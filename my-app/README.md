@@ -1,44 +1,160 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# MSA-Devops-2020-07 Description
+This document is for MSA Phase 1 DevOps assignment.
+# Table of contents
+1. Website URL
+2. Azure build pipeline
+3. Azure release pipeline
 
-## Available Scripts
+# 1.Website url
 
-In the project directory, you can run:
+<https://msa-phase1-devops-2020-06.azurewebsites.net>
 
-### `npm start`
+# 2.Azure build pipeline
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## 2.1 The location that I build the pipeline:
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+![](images/buildPipline_location1.png)
 
-### `npm test`
+![](images/buildPipline_location2.png)
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 2.2 Azure build pipeline Details Overview
 
-### `npm run build`
+### 2.2.1 Yaml File Overview
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```yaml
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+trigger:
+- master
+- development
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+pool:
+  vmImage: 'ubuntu-latest'
 
-### `npm run eject`
+variables: 
+  rootDir: 'my-app'
+  buildDir: '$(rootDir)/build'
+  
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '10.x'
+    displayName: 'Install Node.js'
+  
+  - script: |
+      cd $(rootDir)
+      npm install
+      npm run build
+      cd ..
+    displayName: 'npm install and build'
+  
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(buildDir)'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+      replaceExistingArchive: true
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'
+```
+### 2.2.2 Details:
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+#### Trigger:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+pipeline is triggered by any branch that fits this description. In my case, it will trigger by master branch and development branch. If there any commit changes in two branches, then it will trigger the pipline.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```yaml
+trigger:
+- master
+- development
+```
 
-## Learn More
+#### Variables:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Here the rootDir variable contains the string 'my-app' and the buildDir variable contains the string 'my-app/build'. 
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+There are two variables we declared, and they will be used in the comming part.
+```yaml
+variables: 
+  rootDir: 'my-app'
+  buildDir: '$(rootDir)/build'
+```
+#### Steps--Install Node.js and build App：
+
+In this case, I use Node.js version 10.x, and use npm to install the Node. I use the variables which declared in the last part. In pipline, the syntax $(VARIABLE_NAME) is to access the the variables. 
+```yaml
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '10.x'
+    displayName: 'Install Node.js'
+  
+  - script: |
+      cd $(rootDir)
+      npm install
+      npm run build
+      cd ..
+    displayName: 'npm install and build'
+```
+#### Achieve and Publish
+
+Now zip it and published as artifacts. The $(buildDir) folder contains the build, so it will set as the root folder.  
+```yaml
+task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(buildDir)'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+      replaceExistingArchive: true
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'
+
+```
+# 3. Azure release pipeline
+
+## 3.1 Overview
+
+Release Overview is showing as follow:
+
+![Release Overview](images/releasePipline_1.png)
+
+## 3.2 Task--Development
+
+We set the release as  continuous deployment trigger.
+
+![](images/releasePipline_task_development.png)
+
+## 3.3 Artifact
+
+Release artiface is showing as following:
+
+![](images/releasePipline_artifact.png)
+
+## 3.4 Trigger:
+
+Release trigger setting is showing as following.If there has any new completion comming up from master and development branch, then it will trigger release pipline automatically.
+
+![](images/releasePipline_trigger.png)
+
+
+
+
+
+
+
+
+
+
+
