@@ -13,9 +13,9 @@ This document is for MSA Phase 1 DevOps assignment.
 
 ## 2.1 The location that I build the pipeline:
 
-![](images/buildPipline_location1.png)
+![](my-app/images/buildPipline_location1.png)
 
-![](images/buildPipline_location2.png)
+![](my-app/images/buildPipline_location2.png)
 
 ## 2.2 Azure build pipeline Details Overview
 
@@ -128,25 +128,25 @@ task: ArchiveFiles@2
 
 Release Overview is showing as follow:
 
-![Release Overview](images/releasePipline_1.png)
+![](my-app/images/releasePipline_1.png)
 
 ## 3.2 Task--Development
 
 We set the release as  continuous deployment trigger.
 
-![](images/releasePipline_task_development.png)
+![](my-app/images/releasePipline_task_development.png)
 
 ## 3.3 Artifact
 
 Release artiface is showing as following:
 
-![](images/releasePipline_artifact.png)
+![](my-app/images/releasePipline_artifact.png)
 
 ## 3.4 Trigger:
 
 Release trigger setting is showing as following.If there has any new completion comming up from master and development branch, then it will trigger release pipline automatically.
 
-![](images/releasePipline_trigger.png)
+![](my-app/images/releasePipline_trigger.png)
 
 
 
